@@ -18,3 +18,7 @@ PUT {{StudyTasks.Api_HostAddress}}/tasks/1/toggle
 Accept: application/json
 
 ###
+
+DELETE {{StudyTasks.Api_HostAddress}}/tasks/1
+
+###

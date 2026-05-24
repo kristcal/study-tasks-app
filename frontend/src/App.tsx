@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { createTask, getTasks, toggleTask } from './api'
+import { createTask, deleteTask, getTasks, toggleTask } from './api'
 import type { StudyTask } from './types'
 
 function App() {
@@ -50,6 +50,16 @@ function App() {
     }
   }
 
+  async function handleDelete(id: number) {
+    try {
+      setError(null)
+      await deleteTask(id)
+      await loadTasks()
+    } catch {
+      setError('Could not delete task.')
+    }
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -78,27 +88,35 @@ function App() {
           <ul className="task-list">
             {tasks.map((task) => (
               <li key={task.id}>
-                <label
-                  className={`task-card${task.isCompleted ? ' task-card--completed' : ''}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={task.isCompleted}
-                    onChange={() => handleToggle(task.id)}
-                  />
-                  <span className="task-check" aria-hidden="true">
-                    <svg viewBox="0 0 12 12" fill="none">
-                      <path
-                        d="M2.5 6l2.5 2.5 4.5-5"
-                        stroke="white"
-                        strokeWidth="1.75"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
-                  <span className="task-title">{task.title}</span>
-                </label>
+                <div className={`task-card${task.isCompleted ? ' task-card--completed' : ''}`}>
+                  <label className="task-card__main">
+                    <input
+                      type="checkbox"
+                      checked={task.isCompleted}
+                      onChange={() => handleToggle(task.id)}
+                    />
+                    <span className="task-check" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" fill="none">
+                        <path
+                          d="M2.5 6l2.5 2.5 4.5-5"
+                          stroke="white"
+                          strokeWidth="1.75"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span className="task-title">{task.title}</span>
+                  </label>
+                  <button
+                    type="button"
+                    className="task-delete"
+                    onClick={() => handleDelete(task.id)}
+                    aria-label={`Delete ${task.title}`}
+                  >
+                    🗑️
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

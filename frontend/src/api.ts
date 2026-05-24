@@ -23,3 +23,8 @@ export async function toggleTask(id: number): Promise<StudyTask> {
   if (!res.ok) throw new Error('Failed to toggle task')
   return res.json()
 }
+
+export async function deleteTask(id: number): Promise<void> {
+  const res = await fetch(`${base}/${id}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error('Failed to delete task')
+}

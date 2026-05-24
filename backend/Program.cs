@@ -71,4 +71,18 @@ app.MapPut("/tasks/{id}/toggle", async (int id, AppDbContext db) =>
     return Results.Ok(task);
 });
 
+app.MapDelete("/tasks/{id}", async (int id, AppDbContext db) =>
+{
+    var task = await db.Tasks.FindAsync(id);
+    if (task is null)
+    {
+        return Results.NotFound();
+    }
+
+    db.Tasks.Remove(task);
+    await db.SaveChangesAsync();
+
+    return Results.NoContent();
+});
+
 app.Run();
