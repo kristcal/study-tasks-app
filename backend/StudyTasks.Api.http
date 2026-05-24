@@ -1,0 +1,20 @@
+@StudyTasks.Api_HostAddress = http://localhost:5044
+
+GET {{StudyTasks.Api_HostAddress}}/tasks
+Accept: application/json
+
+###
+
+POST {{StudyTasks.Api_HostAddress}}/tasks
+Content-Type: application/json
+
+{
+  "title": "Read chapter 3"
+}
+
+###
+
+PUT {{StudyTasks.Api_HostAddress}}/tasks/1/toggle
+Accept: application/json
+
+###
