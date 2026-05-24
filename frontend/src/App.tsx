@@ -51,43 +51,60 @@ function App() {
   }
 
   return (
-    <main>
-      <h1>Study Tasks</h1>
+    <div className="app">
+      <header className="header">
+        <h1>Study Tasks</h1>
+      </header>
 
-      <form className="task-form" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="New task…"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          aria-label="Task title"
-        />
-        <button type="submit">Add</button>
-      </form>
+      <div className="panel">
+        <form className="task-form" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="What do you need to study?"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            aria-label="Task title"
+          />
+          <button type="submit">Add task</button>
+        </form>
 
-      {error && <p className="error">{error}</p>}
+        {error && <p className="status status--error">{error}</p>}
 
-      {loading ? (
-        <p className="muted">Loading…</p>
-      ) : tasks.length === 0 ? (
-        <p className="muted">No tasks yet.</p>
-      ) : (
-        <ul className="task-list">
-          {tasks.map((task) => (
-            <li key={task.id} className={task.isCompleted ? 'completed' : ''}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={task.isCompleted}
-                  onChange={() => handleToggle(task.id)}
-                />
-                <span>{task.title}</span>
-              </label>
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
+        {loading ? (
+          <p className="status">Loading tasks…</p>
+        ) : tasks.length === 0 ? (
+          <p className="empty">No tasks yet. Add one above.</p>
+        ) : (
+          <ul className="task-list">
+            {tasks.map((task) => (
+              <li key={task.id}>
+                <label
+                  className={`task-card${task.isCompleted ? ' task-card--completed' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={task.isCompleted}
+                    onChange={() => handleToggle(task.id)}
+                  />
+                  <span className="task-check" aria-hidden="true">
+                    <svg viewBox="0 0 12 12" fill="none">
+                      <path
+                        d="M2.5 6l2.5 2.5 4.5-5"
+                        stroke="white"
+                        strokeWidth="1.75"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <span className="task-title">{task.title}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   )
 }
 
