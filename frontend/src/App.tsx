@@ -3,11 +3,20 @@ import type { FormEvent } from 'react'
 import { createTask, deleteTask, getTasks, toggleTask } from './api'
 import type { StudyTask } from './types'
 
+type Filter = 'all' | 'active' | 'completed'
+
 function App() {
   const [tasks, setTasks] = useState<StudyTask[]>([])
   const [title, setTitle] = useState('')
+  const [filter, setFilter] = useState<Filter>('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === 'active') return !task.isCompleted
+    if (filter === 'completed') return task.isCompleted
+    return true
+  })
 
   const loadTasks = useCallback(async () => {
     try {
@@ -80,13 +89,43 @@ function App() {
 
         {error && <p className="status status--error">{error}</p>}
 
+        {!loading && tasks.length > 0 && (
+          <div className="filters" role="group" aria-label="Filter tasks">
+            <button
+              type="button"
+              className={`filter-btn${filter === 'all' ? ' filter-btn--active' : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              className={`filter-btn${filter === 'active' ? ' filter-btn--active' : ''}`}
+              onClick={() => setFilter('active')}
+            >
+              Active
+            </button>
+            <button
+              type="button"
+              className={`filter-btn${filter === 'completed' ? ' filter-btn--active' : ''}`}
+              onClick={() => setFilter('completed')}
+            >
+              Completed
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <p className="status">Loading tasks…</p>
         ) : tasks.length === 0 ? (
           <p className="empty">No tasks yet. Add one above.</p>
+        ) : filteredTasks.length === 0 ? (
+          <p className="empty">
+            {filter === 'active' ? 'No active tasks.' : 'No completed tasks.'}
+          </p>
         ) : (
           <ul className="task-list">
-            {tasks.map((task) => (
+            {filteredTasks.map((task) => (
               <li key={task.id}>
                 <div className={`task-card${task.isCompleted ? ' task-card--completed' : ''}`}>
                   <label className="task-card__main">
