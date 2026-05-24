@@ -57,6 +57,25 @@ app.MapPost("/tasks", async (CreateTaskRequest request, AppDbContext db) =>
     return Results.Created($"/tasks/{task.Id}", task);
 });
 
+app.MapPut("/tasks/{id}", async (int id, CreateTaskRequest request, AppDbContext db) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Title))
+    {
+        return Results.BadRequest(new { error = "Title is required." });
+    }
+
+    var task = await db.Tasks.FindAsync(id);
+    if (task is null)
+    {
+        return Results.NotFound();
+    }
+
+    task.Title = request.Title.Trim();
+    await db.SaveChangesAsync();
+
+    return Results.Ok(task);
+});
+
 app.MapPut("/tasks/{id}/toggle", async (int id, AppDbContext db) =>
 {
     var task = await db.Tasks.FindAsync(id);

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { createTask, deleteTask, getTasks, toggleTask } from './api'
+import { createTask, deleteTask, getTasks, toggleTask, updateTask } from './api'
 import type { StudyTask } from './types'
 
 type Filter = 'all' | 'active' | 'completed'
@@ -9,6 +9,8 @@ function App() {
   const [tasks, setTasks] = useState<StudyTask[]>([])
   const [title, setTitle] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editTitle, setEditTitle] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -69,6 +71,26 @@ function App() {
     }
   }
 
+  function startEdit(task: StudyTask) {
+    setEditingId(task.id)
+    setEditTitle(task.title)
+  }
+
+  async function handleSave(id: number) {
+    const trimmed = editTitle.trim()
+    if (!trimmed) return
+
+    try {
+      setError(null)
+      const updated = await updateTask(id, trimmed)
+      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)))
+      setEditingId(null)
+      setEditTitle('')
+    } catch {
+      setError('Could not save task.')
+    }
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -125,7 +147,10 @@ function App() {
           </p>
         ) : (
           <ul className="task-list">
-            {filteredTasks.map((task) => (
+            {filteredTasks.map((task) => {
+              const isEditing = editingId === task.id
+
+              return (
               <li key={task.id}>
                 <div className={`task-card${task.isCompleted ? ' task-card--completed' : ''}`}>
                   <label className="task-card__main">
@@ -133,6 +158,7 @@ function App() {
                       type="checkbox"
                       checked={task.isCompleted}
                       onChange={() => handleToggle(task.id)}
+                      disabled={isEditing}
                     />
                     <span className="task-check" aria-hidden="true">
                       <svg viewBox="0 0 12 12" fill="none">
@@ -145,19 +171,51 @@ function App() {
                         />
                       </svg>
                     </span>
-                    <span className="task-title">{task.title}</span>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        className="task-edit-input"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        aria-label="Edit task title"
+                        autoFocus
+                      />
+                    ) : (
+                      <span className="task-title">{task.title}</span>
+                    )}
                   </label>
-                  <button
-                    type="button"
-                    className="task-delete"
-                    onClick={() => handleDelete(task.id)}
-                    aria-label={`Delete ${task.title}`}
-                  >
-                    🗑️
-                  </button>
+                  <div className="task-actions">
+                    {isEditing ? (
+                      <button
+                        type="button"
+                        className="task-save"
+                        onClick={() => handleSave(task.id)}
+                      >
+                        Save
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="task-edit"
+                        onClick={() => startEdit(task)}
+                        aria-label={`Edit ${task.title}`}
+                      >
+                        ✏️
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="task-delete"
+                      onClick={() => handleDelete(task.id)}
+                      aria-label={`Delete ${task.title}`}
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               </li>
-            ))}
+              )
+            })}
           </ul>
         )}
       </div>
